@@ -138,7 +138,7 @@ tft.setFont();
   tft.setTextSize(1);  // Set text size. We are using custom font so you should always set text size as 0
   tft.setCursor(0, 120);  // Set position (x,y)
   tft.setTextColor(RED);  // Set color of text. First is the color of text and after is color of background
-  tft.println("Rev 0.11");  // Print a text or value
+  tft.println("Rev 0.12");  // Print a text or value
 
   
 
