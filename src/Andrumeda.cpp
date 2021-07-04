@@ -42,10 +42,25 @@ int Variable1;  // Create a variable to have something dynamic to show on the di
 int treshold = 200;
 float a = 0;
 int pinValue = 0;
+int count = 200;  // Create a variable for calibration TIMEs
 
 int atreshold(){
-  int a22 = analogRead(22);  
+    // Write to the display the text "Hello":
+  tft.setCursor(0, 1);  // Set position (x,y)
+  tft.setTextColor(WHITE);  // Set color of text. First is the color of text and after is color of background
+  tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
+  tft.println("Calibration");  // Print a text or value
+  int b,c = 0;
+  for (int i = 0; i < count; i++)
+  {
+    b = analogRead(22);
+    c = c + b;
+  }  
+  int a22 = c / count;  
+
+  //int a22 = analogRead(22); 
   int avalue = map(a22, 0, 1023, 1023,0);
+  tft.fillScreen(GREEN); // (BLACK);  // Fill screen with black
   return avalue;
 }
 
@@ -64,7 +79,7 @@ void setup()  // Start of setup
   digitalWrite(1,LOW);
   digitalWrite(2,LOW);
   digitalWrite(3,LOW);
-  treshold = atreshold();
+
   
 {//Audio setup:
   //AudioMemory(20);   
@@ -147,6 +162,8 @@ tft.setFont();
   tft.fillScreen(); // (BLACK);  // Fill screen with black
 }
 
+  treshold = atreshold();
+  tft.fillScreen(); // (BLACK);  // Fill screen with black
 
   // Write to the display the text "Hello":
   tft.setCursor(0, 1);  // Set position (x,y)
@@ -154,8 +171,7 @@ tft.setFont();
   tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
   tft.println("Andrumeda");  // Print a text or value
 
-  
-  
+
   // Start using a custom font:
   tft.setFont(&FreeSerif18pt7b);  // Set a custom font
   tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
@@ -193,6 +209,8 @@ tft.setFont();
   // Draw rounded rectangle and fill:
   //tft.fillRoundRect(88, 28, 40, 27, 5, 0xF81B);  // Draw rounded filled rectangle (x,y,width,height,color)
   
+
+
 }  // End of setup
 
 
