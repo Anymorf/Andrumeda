@@ -283,7 +283,7 @@ int adc()
 }
 
 
-void drawScreenTable()
+void Draw_One()
 {
   tft.fillScreen(GREEN); // (BLACK);  // Fill screen with black
 	// try with Lines
