@@ -45,10 +45,13 @@ TFT_ILI9163C tft = TFT_ILI9163C(TFT_CS, TFT_DC, TFT_RST);
 
 
 // GUItool: begin automatically generated code
-AudioSynthWaveform       waveform1;      //xy=265,233.75
+//AudioSynthWaveform       waveform1;      //xy=265,233.75
+AudioSynthWaveformSine   sine1;
 AudioOutputI2S           i2s1;           //xy=619,276
-AudioConnection          patchCord1(waveform1, 0, i2s1, 0);
-AudioConnection          patchCord2(waveform1, 0, i2s1, 1);
+AudioConnection          patchCord1(sine1, 0, i2s1, 0);
+AudioConnection          patchCord2(sine1, 0, i2s1, 1);
+//AudioConnection          patchCord1(waveform1, 0, i2s1, 0);
+//AudioConnection          patchCord2(waveform1, 0, i2s1, 1);
 //AudioControlSGTL5000     sgtl5000_1;     //xy=641.0000152587891,216.75000667572021
 // GUItool: end automatically generated code
 
@@ -77,27 +80,6 @@ int atreshold()
   int avalue = map(a22, 0, 1023, 1023,0);
   tft.fillScreen(GREEN); // (BLACK);  // Fill screen with black
   return avalue;
-}
-
-void drawScreenADC()
-{
-  tft.fillScreen(); // (BLACK);  // Fill screen with black
-	// Write to the display the text "Hello":
-	tft.setCursor(0, 0);  // Set position (x,y)
-	tft.setTextColor(WHITE, BLACK);  // Set color of text. First is the color of text and after is color of background
-	tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-	tft.println("ADC-Screen");  // Print text
-	
-	// Draw line:
-	tft.drawLine(0, 55, 127, 55, CYAN);  // Draw line (x0,y0,x1,y1,color)
-
-	// Draw rectangle:
-	tft.drawRect(0, 60, 60, 30, CYAN);  // Draw rectangle (x,y,width,height,color)
-												 // It draws from the location to down-right							 
-	// Draw rounded rectangle:
-	tft.drawRoundRect(68, 60, 60, 30, 10, CYAN);  // Draw rounded rectangle (x,y,width,height,radius,color)
-
-	return;
 }
 
 void setup()  // Start of setup
@@ -131,7 +113,8 @@ void setup()  // Start of setup
   //digitalWrite(EN, LOW);
 }
 {// Audio setup:
-  //AudioMemory(20);   
+  //AudioMemory(12);      // PCM5102
+  //AudioMemory(20);      // sgtl5000
   //sgtl5000_1.enable();
   //sgtl5000_1.volume(0.6);
   //waveform1.begin(WAVEFORM_SAWTOOTH);
@@ -141,11 +124,11 @@ void setup()  // Start of setup
 
   AudioMemory(4);
   AudioNoInterrupts();
-  waveform1.begin(WAVEFORM_SAWTOOTH);
-  waveform1.frequency(240.00);
-  waveform1.pulseWidth(0.15);
-  //sine1.frequency(440);
-  //sine1.amplitude(0.5);
+  //waveform1.begin(WAVEFORM_SAWTOOTH);
+  //waveform1.frequency(240.00);
+  //waveform1.pulseWidth(0.15);
+  sine1.frequency(440);
+  sine1.amplitude(0.5);
   AudioInterrupts();
 }
 {// Display setup:
@@ -225,13 +208,13 @@ void setup()  // Start of setup
 	// Write to the display the text "World":
 	tft.setCursor(1, 50);  // Set position (x,y)
 	tft.setTextColor(RED);  // Set color of text. We are using custom font so there is no background color supported
-	tft.println("5 ver 0.2");  // Print a text or value
+	tft.println("5 v. PCM");  // Print a text or value
 
 	// Stop using a custom font:
 	tft.setFont();  // Reset to standard font, to stop using any custom font previously set
 
-	drawScreenADC();
-/*
+
+
   // Draw line:
   tft.drawLine(0, 55, 127, 55, CYAN);  // Draw line (x0,y0,x1,y1,color)
 
@@ -256,7 +239,7 @@ void setup()  // Start of setup
 
   // Draw rounded rectangle and fill:
   //tft.fillRoundRect(88, 28, 40, 27, 5, 0xF81B);  // Draw rounded filled rectangle (x,y,width,height,color)
- */ 
+
   digitalWrite(13, LOW);
 }  // End of setup
 
@@ -282,94 +265,9 @@ int adc()
   return result;
 }
 
-
-void drawScreenTable()
-{
-  tft.fillScreen(GREEN); // (BLACK);  // Fill screen with black
-	// try with Lines
-	// Draw line:
-	//tft.drawLine(0, 0, 127, 0, CYAN);  // Draw line (x0,y0,x1,y1,color)
-  //for(int i = 0; i < 4; i ++)	
-  //for (int Y = 0; Y == 127; 16)
-	for (int Y = 1; Y <= 127; Y +=16)
-  { 
-		tft.drawLine(0, Y, 127, Y, CYAN);  // Draw line (x0,y0,x1,y1,color)
-	}
-	tft.drawLine(0, 0, 0, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
-	tft.drawLine(63, 0, 63, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
-	tft.drawLine(100, 0, 127, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
-	return;
-}
-
-
-void Zet2()
-{
-  if(READ_SIG2 < 100)  // If Variable1 is less than 10...SIG2
-  {
-    state = false;
-    tft.fillTriangle(100, 120, 110, 94, 120, 120, RED);  // Draw filled triangle (x0,y0,x1,y1,x2,y2,color)
-  }
-  else
-  {
-    state = true;
-    tft.fillTriangle(100, 120, 110, 94, 120, 120, CYAN);  // Draw filled triangle (x0,y0,x1,y1,x2,y2,color)
-  }
-}
-
-
-int readMux(int channel)
-{
-  int controlPin[] = {S0, S1, S2, S3};
-
-  int muxChannel[16][4]={
-    {0,0,0,0}, //channel 0
-    {1,0,0,0}, //channel 1
-    {0,1,0,0}, //channel 2
-    {1,1,0,0}, //channel 3
-    {0,0,1,0}, //channel 4
-    {1,0,1,0}, //channel 5
-    {0,1,1,0}, //channel 6
-    {1,1,1,0}, //channel 7
-    {0,0,0,1}, //channel 8
-    {1,0,0,1}, //channel 9
-    {0,1,0,1}, //channel 10
-    {1,1,0,1}, //channel 11
-    {0,0,1,1}, //channel 12
-    {1,0,1,1}, //channel 13
-    {0,1,1,1}, //channel 14
-    {1,1,1,1}  //channel 15
-  };
-
-  //loop through the 4 sig
-  for(int i = 0; i < 4; i ++){
-    digitalWrite(controlPin[i], muxChannel[channel][i]);
-  }
-
-  //read the value at the SIG pin
-  int val = adc();
-
-  //return the value
-  return val;
-}
-
-
 void loop()  // Start of loop
 {
-  //Zet2();
- 	if(READ_SIG2 < 100)  // If Variable1 is less than 10...SIG2
-	{
-		drawScreenTable();    
-    // Draw triangle:
-    tft.drawTriangle(60,120, 70,94, 80,120, YELLOW);  // Draw triangle (x0,y0,x1,y1,x2,y2,color)
-    tft.fillTriangle(100, 120, 110, 94, 120, 120, RED);  // Draw filled triangle (x0,y0,x1,y1,x2,y2,color)
-	}
-	else
-	{    
-		drawScreenADC();
-    // Draw triangle:
-    tft.drawTriangle(60,120, 70,94, 80,120, BLUE);  // Draw triangle (x0,y0,x1,y1,x2,y2,color)
-    tft.fillTriangle(100, 120, 110, 94, 120, 120, CYAN);  // Draw filled triangle (x0,y0,x1,y1,x2,y2,color)
-		
+ 
 		Variable1 = adc();		// Convert Variable1 into a string, so we can change the text alignment to the right:
 									// It can be also used to add or remove decimal numbers.
 		char string[10];			// Create a character array of 10 characters
@@ -394,29 +292,29 @@ void loop()  // Start of loop
 			// There is a problem when we go, for example, from 100 to 99 because it doesn't automatically write a background on
 			// the last digit we are not longer refreshing. We need to check how many digits are and fill the space remaining.
 		}
-		  
+		  pinValue = analogRead(22);
 		{//Правое окошко
 			tft.setCursor(75, 67);  // Set position (x,y)
 			tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
 			tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-			Vol = mapInput(Variable1);
-			tft.println(a);  // Print a text or value
+			Vol = mapInput(pinValue);
+			tft.println(Vol);  // Print a text or value
 		}
 		
-		{// текст внизу
+		{// текст внизу			
+      // Draw a black square in the background to "clear" the previous text:
+			// This is because we are going to use a custom font, and that doesn't support brackground color.
+			tft.fillRect(0, 90, 55, 34, BLACK);  // Draw filled rectangle (x,y,width,height,color)
 			tft.setFont(&FreeSerif12pt7b);  // Set a custom font
 			tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
 			tft.setCursor(0, 120);  // Set position (x,y)
 			tft.setTextColor(MAGENTA);  // Set color of text. We are using custom font so there is no background color supported
 			tft.println(Variable1);  // Print Variable1
 			tft.setFont();  // Reset to standard font, to stop using any custom font previously set
-			// Draw a black square in the background to "clear" the previous text:
-			// This is because we are going to use a custom font, and that doesn't support brackground color.
-			//tft.fillRect(0, 90, 55, 34, BLACK);  // Draw filled rectangle (x,y,width,height,color)
+
 		}
 		//pinValue = analogRead(22);
-		waveform1.amplitude(mapInput(Variable1));
+		//waveform1.amplitude(mapInput(pinValue));
 		delay(10);
-		
-	}
+
 }  // End of loop
