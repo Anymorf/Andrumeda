@@ -42,7 +42,7 @@
 
 // Create display:
 TFT_ILI9163C tft = TFT_ILI9163C(TFT_CS, TFT_DC, TFT_RST);
-#define REV "Rev 0.2.45"
+#define REV "Rev 0.2.46"
 #define LogoTime 250
 
 // GUItool: begin automatically generated code
@@ -101,8 +101,9 @@ void setup()  // Start of setup
   digitalWrite(S1, LOW);
   digitalWrite(S2, LOW);
   digitalWrite(S3, LOW);
-  pinMode(SIG1, INPUT_PULLDOWN);    //  A8
-  pinMode(SIG2, INPUT_PULLDOWN);    //  A8
+  pinMode(SIG1, INPUT_PULLUP);    //  A8
+  pinMode(SIG2, INPUT_PULLUP);    //  A8
+  Serial.println("Setup");
 }
 {// Audio setup:
   AudioMemory(20);   
@@ -198,16 +199,17 @@ void setup()  // Start of setup
 	tft.setFont();  // Reset to standard font, to stop using any custom font previously set
 
   digitalWrite(13, LOW);
+  Serial.println("End of setup");
 }  // End of setup
 
 
 float mapInput(int readValue)
 {
-  digitalWrite(13, HIGH);
+  //digitalWrite(13, HIGH);
   int avalue = map(readValue, 0, 1023, 1023,0);
   float result = ((avalue - treshold)/855.00);
   //Serial.println(result);
-  digitalWrite(13, LOW);
+  //digitalWrite(13, LOW);
   return result;
 }
 
@@ -368,6 +370,98 @@ int readMux(int channel)
 }
 
 
+int RawMux(int channel)
+{
+  switch (channel) {
+    case 0:    // your hand is on the sensor
+      Draw_One();
+      break;
+    case 1:    // your hand is on the sensor
+      Draw_One();
+      break;
+    case 2:    // your hand is close to the sensor
+      Draw_One();
+      break;
+    case 3:    // your hand is a few inches from the sensor
+      Draw_Three();
+      break;
+    case 4:    // your hand is nowhere near the sensor
+      Draw_Four();
+      break;
+    case 5:    // your hand is on the sensor
+      Draw_One();
+      break;
+    case 6:    // your hand is close to the sensor
+      Draw_Two();
+      break;
+    case 7:    // your hand is a few inches from the sensor
+      Draw_Three();
+      break;
+    case 8:    // your hand is nowhere near the sensor
+      Draw_Four();
+      break;
+    case 9:    // your hand is on the sensor
+      Draw_One();
+      break;
+    case 10:    // your hand is close to the sensor
+      Draw_Two();
+      break;
+    case 11:    // your hand is a few inches from the sensor
+      Draw_Three();
+      break;
+    case 12:    // your hand is nowhere near the sensor
+      Draw_Four();
+      break;
+    case 13:    // your hand is on the sensor
+      Draw_One();
+      break;
+    case 14:    // your hand is close to the sensor
+      Draw_Two();
+      break;
+    case 15:    // your hand is a few inches from the sensor
+      Draw_Three();
+      break;
+    case 16:    // your hand is nowhere near the sensor
+      Draw_Four();
+      break;
+
+  }
+  
+  
+  int controlPin[] = {S0, S1, S2, S3};
+
+  int muxChannel[16][4]={
+    {0,0,0,0}, //channel 0
+    {1,0,0,0}, //channel 1
+    {0,1,0,0}, //channel 2
+    {1,1,0,0}, //channel 3
+    {0,0,1,0}, //channel 4
+    {1,0,1,0}, //channel 5
+    {0,1,1,0}, //channel 6
+    {1,1,1,0}, //channel 7
+    {0,0,0,1}, //channel 8
+    {1,0,0,1}, //channel 9
+    {0,1,0,1}, //channel 10
+    {1,1,0,1}, //channel 11
+    {0,0,1,1}, //channel 12
+    {1,0,1,1}, //channel 13
+    {0,1,1,1}, //channel 14
+    {1,1,1,1}  //channel 15
+  };
+
+  //loop through the 4 sig
+  for(int i = 0; i < 4; i ++){
+    digitalWrite(controlPin[i], muxChannel[channel][i]);
+  }
+
+  //read the value at the SIG pin
+  int val = READ_SIG1;
+  //int val = adc();
+
+  //return the value
+  return val;
+}
+
 void menuButton()
 {
   buttonState = digitalRead(SIG2);
@@ -380,10 +474,36 @@ void menuButton()
     tft.fillScreen(); // (BLACK);  // Fill screen with black
     switch (B) {
       case 1:    // your hand is on the sensor
+        Serial.println("One");
         Draw_One();
+        digitalWrite(13, HIGH);
+        delay(250);
+        digitalWrite(13, LOW);
+        delay(250);
+        digitalWrite(13, HIGH);
+        delay(250);
+        digitalWrite(13, LOW);
+        delay(250);
         break;
       case 2:    // your hand is close to the sensor
+        Serial.println("Two");
         Draw_Two();
+        digitalWrite(13, HIGH);
+        delay(250);
+        digitalWrite(13, LOW);
+        delay(250);
+        digitalWrite(13, HIGH);
+        delay(250);
+        digitalWrite(13, LOW);
+        delay(250);
+        digitalWrite(13, HIGH);
+        delay(250);
+        digitalWrite(13, LOW);
+        delay(250);
+        digitalWrite(13, HIGH);
+        delay(250);
+        digitalWrite(13, LOW);
+        delay(250);
         break;
       case 3:    // your hand is a few inches from the sensor
         Draw_Three();
@@ -496,6 +616,7 @@ void Error()
 
 void loop()  // Start of loop
 {
+  //Serial.println("loop");
   menuButton();
   switch (B) {
     case 1:    // your hand is on the sensor
