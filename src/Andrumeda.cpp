@@ -8,20 +8,17 @@
 #include <TFT_ILI9163C.h>
 
 #include <Audio.h>
-
+//#include <SD.h>
+#define REV "Rev 0.2.76"
 // Declare pins for the MUX CD74HC4067:
-//#define EN 3
-#define S0 4
-#define S1 5
-#define S2 6
-#define S3 7 
+#define S0 0
+#define S1 1
+#define S2 2
+#define S3 3 
 #define SIG1 22   //  A8
 #define SIG2 16   //  A8
 #define READ_SIG1 analogRead(SIG1)
 #define READ_SIG2 analogRead(SIG2)
-
-#define Z1 22   //  A8
-#define Z2 16   //  A2
 
 // Color definitions
 #define BLACK   0x0000
@@ -42,7 +39,7 @@
 
 // Create display:
 TFT_ILI9163C tft = TFT_ILI9163C(TFT_CS, TFT_DC, TFT_RST);
-#define REV "Rev 0.2.46"
+
 #define LogoTime 250
 
 // GUItool: begin automatically generated code
@@ -53,7 +50,7 @@ AudioConnection          patchCord2(waveform1, 0, i2s1, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=641.0000152587891,216.75000667572021
 // GUItool: end automatically generated code
 
-int Variable1;  // Create a variable to have something dynamic to show on the display
+int Var, ABC, EDF, Variable1;  // Create a variable to have something dynamic to show on the display
 int treshold = 50;
 float Vol, a = 0;		// volume
 int pinValue = 0;
@@ -109,8 +106,7 @@ void setup()  // Start of setup
   AudioMemory(20);   
   sgtl5000_1.enable();
   sgtl5000_1.volume(0.6);
-  waveform1.begin(WAVEFORM_SAWTOOTH);
-  ///////waveform1.amplitude(0.75);
+  /////waveform1.amplitude(0.75);
   waveform1.frequency(240.00);
   waveform1.pulseWidth(0.15);
 
@@ -130,7 +126,8 @@ void setup()  // Start of setup
   //tft.setRotation(rotation);
   tft.fillScreen(); // (BLACK);  // Fill screen with black
 
-  tft.setRotation(2);  // Set orientation of the display. Values are from 0 to 3. If not declared, orientation would be 0,
+  tft.setRotation(0);  // Set orientation of the display. Values are from 0 to 3. If not declared, orientation would be 0,
+  //tft.setRotation(2);  // Set orientation of the display. Values are from 0 to 3. If not declared, orientation would be 0,
                          // which is portrait mode.
 
   tft.setTextWrap(false);  // By default, long lines of text are set to automatically "wrap" back to the leftmost column.
@@ -166,7 +163,7 @@ void setup()  // Start of setup
   tft.println("Andrumeda 5");  // Print a text or value
 
 	tft.setFont();
-    // Start using a custom font:
+  // Start using a custom font:
   //tft.setFont(&FreeSerif18pt7b);  // Set a custom font
   tft.setTextSize(1);  // Set text size. We are using custom font so you should always set text size as 0
   tft.setCursor(0, 120);  // Set position (x,y)
@@ -193,26 +190,31 @@ void setup()  // Start of setup
 	// Write to the display the text "World":
 	tft.setCursor(1, 50);  // Set position (x,y)
 	tft.setTextColor(RED);  // Set color of text. We are using custom font so there is no background color supported
-	tft.println("5");  // Print a text or value
+	tft.println(REV);  // Print a text or value
 
 	// Stop using a custom font:
 	tft.setFont();  // Reset to standard font, to stop using any custom font previously set
 
   digitalWrite(13, LOW);
   Serial.println("End of setup");
+  tft.drawLine(-1, 0, -1, 127, BLACK);  // Draw line (x0,y0,x1,y1,color)
 }  // End of setup
 
 
 float mapInput(int readValue)
 {
-  //digitalWrite(13, HIGH);
   int avalue = map(readValue, 0, 1023, 1023,0);
-  float result = ((avalue - treshold)/855.00);
-  //Serial.println(result);
-  //digitalWrite(13, LOW);
+  float result = ((avalue - treshold)/1023.00);
   return result;
 }
 
+float volume(int Value)
+{
+  //int avalue = map(Value, 0, 1023, 1023,0);  
+  //float result = ((avalue - treshold)/1023 - treshold);
+  float result = (Value / (1023.00 - treshold));
+  return result;
+}
 
 int adc()
 {
@@ -229,6 +231,8 @@ int adc()
 void Draw_One()
 {
   tft.drawLine(-1, 0, -1, 127, BLACK);  // Draw line (x0,y0,x1,y1,color)
+  //tft.drawLine(0, 0, 0, 127, BLACK);  // Draw line (x0,y0,x1,y1,color)  
+  //tft.drawLine(1, 0, 1, 127, BLACK);  // Draw line (x0,y0,x1,y1,color)
   	// Write to the display the text "Hello":
 	tft.setCursor(0, 4);  // Set position (x,y)
 	tft.setTextColor(WHITE, BLACK);  // Set color of text. First is the color of text and after is color of background
@@ -257,7 +261,7 @@ void Draw_Two()
   // try with Lines
 	// Draw line:
   tft.drawLine(-1, -1, 127, -1, CYAN);  // Draw line (x0,y0,x1,y1,color)
-	for (int Y = 2; Y < 127; Y +=16)
+	for (int Y = 0; Y < 127; Y +=16)
   { 
 		tft.drawLine(-1, Y, 127, Y, CYAN);  // Draw line (x0,y0,x1,y1,color)
 	}
@@ -267,6 +271,48 @@ void Draw_Two()
 	tft.drawLine(63, 0, 63, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
 	tft.drawLine(126, 0, 126, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
 
+  // Set Numbers position (x,y)
+  int i = 1;
+  int Y = 6;
+  for (i = 1; i < 9; i++)
+  {
+    tft.setCursor(5, Y);  // Set position (x,y)
+		tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
+		tft.setTextSize(1);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
+		tft.println(i);  // Print a text or value
+     Y += 16;
+  }
+
+    Y = 6;
+    for (i = 9; i < 17; i++)
+  {
+    tft.setCursor(68, Y);  // Set position (x,y)
+		//tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
+		//tft.setTextSize(1);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
+		tft.println(i);  // Print a text or value
+    //X = -1;
+    Y += 16;
+  }
+	return;
+}
+
+
+void Draw_Three()
+{
+  // try with Lines
+	// Draw line:
+  int Color = GREEN;
+  tft.drawLine(-1, -1, 127, -1, Color);  // Draw line (x0,y0,x1,y1,color)
+	for (int Y = 0; Y < 127; Y +=16)
+  { 
+		tft.drawLine(-1, Y, 127, Y, Color);  // Draw line (x0,y0,x1,y1,color)
+	}
+  tft.drawLine(-1, 127, 127, 127, Color);  // Draw line (x0,y0,x1,y1,color)
+
+	tft.drawLine(-1, 0, -1, 127, Color);  // Draw line (x0,y0,x1,y1,color)
+	tft.drawLine(63, 0, 63, 127, Color);  // Draw line (x0,y0,x1,y1,color)
+	tft.drawLine(126, 0, 126, 127, Color);  // Draw line (x0,y0,x1,y1,color)
+
   // Set position (x,y)
   int i = 1;
   //int X = 5;
@@ -274,7 +320,7 @@ void Draw_Two()
   for (i = 1; i < 9; i++)
   {
     tft.setCursor(5, Y);  // Set position (x,y)
-		tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
+		tft.setTextColor(CYAN, BLACK);  // Set color: First color of text and after is color of background
 		tft.setTextSize(1);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
 		tft.println(i);  // Print a text or value
      Y += 16;
@@ -292,11 +338,6 @@ void Draw_Two()
     Y += 16;
   }
 	return;
-}
-
-
-void Draw_Three()
-{
   
 }
 
@@ -304,6 +345,7 @@ void Draw_Three()
 void Draw_Four()
 {
   
+	return;
 }
 
 
@@ -330,6 +372,7 @@ void Draw_Error()
 
 	// Stop using a custom font:
 	tft.setFont();  // Reset to standard font, to stop using any custom font previously set
+	return;
 }
 
 
@@ -362,72 +405,16 @@ int readMux(int channel)
   }
 
   //read the value at the SIG pin
-  int val = READ_SIG1;
-  //int val = adc();
+  //int val = READ_SIG1;
+  int val = adc();
 
   //return the value
   return val;
 }
 
 
-int RawMux(int channel)
+void RawMux(int channel)
 {
-  switch (channel) {
-    case 0:    // your hand is on the sensor
-      Draw_One();
-      break;
-    case 1:    // your hand is on the sensor
-      Draw_One();
-      break;
-    case 2:    // your hand is close to the sensor
-      Draw_One();
-      break;
-    case 3:    // your hand is a few inches from the sensor
-      Draw_Three();
-      break;
-    case 4:    // your hand is nowhere near the sensor
-      Draw_Four();
-      break;
-    case 5:    // your hand is on the sensor
-      Draw_One();
-      break;
-    case 6:    // your hand is close to the sensor
-      Draw_Two();
-      break;
-    case 7:    // your hand is a few inches from the sensor
-      Draw_Three();
-      break;
-    case 8:    // your hand is nowhere near the sensor
-      Draw_Four();
-      break;
-    case 9:    // your hand is on the sensor
-      Draw_One();
-      break;
-    case 10:    // your hand is close to the sensor
-      Draw_Two();
-      break;
-    case 11:    // your hand is a few inches from the sensor
-      Draw_Three();
-      break;
-    case 12:    // your hand is nowhere near the sensor
-      Draw_Four();
-      break;
-    case 13:    // your hand is on the sensor
-      Draw_One();
-      break;
-    case 14:    // your hand is close to the sensor
-      Draw_Two();
-      break;
-    case 15:    // your hand is a few inches from the sensor
-      Draw_Three();
-      break;
-    case 16:    // your hand is nowhere near the sensor
-      Draw_Four();
-      break;
-
-  }
-  
-  
   int controlPin[] = {S0, S1, S2, S3};
 
   int muxChannel[16][4]={
@@ -449,24 +436,138 @@ int RawMux(int channel)
     {1,1,1,1}  //channel 15
   };
 
-  //loop through the 4 sig
-  for(int i = 0; i < 4; i ++){
-    digitalWrite(controlPin[i], muxChannel[channel][i]);
+  digitalWrite(controlPin[0], muxChannel[channel][0]);
+  digitalWrite(controlPin[1], muxChannel[channel][1]);
+  digitalWrite(controlPin[2], muxChannel[channel][2]);
+  digitalWrite(controlPin[3], muxChannel[channel][3]);
+  
+  /*
+  switch (channel) {
+    case 0:    // your hand is on the sensor
+      digitalWrite(S0, LOW);
+      digitalWrite(S1, LOW);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 1:    // your hand is on the sensor
+      digitalWrite(controlPin[1], muxChannel[channel][1]);
+      digitalWrite(controlPin[2], muxChannel[channel][2]);
+      digitalWrite(controlPin[3], muxChannel[channel][3]);
+      digitalWrite(controlPin[4], muxChannel[channel][4]);
+      break;
+    case 2:    // your hand is close to the sensor
+      digitalWrite(S0, LOW);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 3:    // your hand is a few inches from the sensor
+      digitalWrite(S0, muxChannel[channel][1]);
+      digitalWrite(S1, muxChannel[channel][2]);
+      digitalWrite(S2, muxChannel[channel][3]);
+      digitalWrite(S3, muxChannel[channel][4]);
+      break;
+    case 4:    // your hand is nowhere near the sensor
+      digitalWrite(S0, LOW);
+      digitalWrite(S1, LOW);
+      digitalWrite(S2, HIGH);
+      digitalWrite(S3, LOW);
+      break;
+    case 5:    // your hand is on the sensor
+      digitalWrite(controlPin[1], muxChannel[channel][1]);
+      digitalWrite(controlPin[2], muxChannel[channel][2]);
+      digitalWrite(controlPin[3], muxChannel[channel][3]);
+      digitalWrite(controlPin[4], muxChannel[channel][4]);
+      break;
+    case 6:    // your hand is close to the sensor
+      digitalWrite(controlPin[1], muxChannel[channel][1]);
+      digitalWrite(controlPin[2], muxChannel[channel][2]);
+      digitalWrite(controlPin[3], muxChannel[channel][3]);
+      digitalWrite(controlPin[4], muxChannel[channel][4]);
+      break;
+    case 7:    // your hand is a few inches from the sensor
+      digitalWrite(controlPin[1], muxChannel[channel][1]);
+      digitalWrite(controlPin[2], muxChannel[channel][2]);
+      digitalWrite(controlPin[3], muxChannel[channel][3]);
+      digitalWrite(controlPin[4], muxChannel[channel][4]);
+      break;
+    case 8:    // your hand is nowhere near the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 9:    // your hand is on the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 10:    // your hand is close to the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 11:    // your hand is a few inches from the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 12:    // your hand is nowhere near the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 13:    // your hand is on the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 14:    // your hand is close to the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 15:    // your hand is a few inches from the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
+    case 16:    // your hand is nowhere near the sensor
+      digitalWrite(S0, HIGH);
+      digitalWrite(S1, HIGH);
+      digitalWrite(S2, LOW);
+      digitalWrite(S3, LOW);
+      break;
   }
-
+  */
+  //int val = adc();  
+  //delay(5);
+  //digitalWrite(13, LOW);
+  //digitalWrite(13, LOW);
+  //digitalWrite(13, LOW);
+  //digitalWrite(13, LOW);
   //read the value at the SIG pin
-  int val = READ_SIG1;
+  //int val = READ_SIG1;
   //int val = adc();
 
   //return the value
-  return val;
+  //return val;
+  return;
 }
 
 void menuButton()
 {
+  RawMux(0);
   buttonState = digitalRead(SIG2);
   if (buttonState == LOW) {
-    if (B >= 2) {   // 4  указывает количество пунктов меню
+    if (B >= 3) {   // 4  указывает количество пунктов меню
       B = 1;
     } else {
       B = B + 1;
@@ -474,41 +575,19 @@ void menuButton()
     tft.fillScreen(); // (BLACK);  // Fill screen with black
     switch (B) {
       case 1:    // your hand is on the sensor
-        Serial.println("One");
+        Serial.println("Draw_One");
         Draw_One();
-        digitalWrite(13, HIGH);
-        delay(250);
-        digitalWrite(13, LOW);
-        delay(250);
-        digitalWrite(13, HIGH);
-        delay(250);
-        digitalWrite(13, LOW);
-        delay(250);
         break;
       case 2:    // your hand is close to the sensor
-        Serial.println("Two");
+        Serial.println("Draw_Two");
         Draw_Two();
-        digitalWrite(13, HIGH);
-        delay(250);
-        digitalWrite(13, LOW);
-        delay(250);
-        digitalWrite(13, HIGH);
-        delay(250);
-        digitalWrite(13, LOW);
-        delay(250);
-        digitalWrite(13, HIGH);
-        delay(250);
-        digitalWrite(13, LOW);
-        delay(250);
-        digitalWrite(13, HIGH);
-        delay(250);
-        digitalWrite(13, LOW);
-        delay(250);
         break;
       case 3:    // your hand is a few inches from the sensor
+        Serial.println("Draw_Three");
         Draw_Three();
         break;
       case 4:    // your hand is nowhere near the sensor
+        Serial.println("Draw_Four");
         Draw_Four();
         break;
       default:
@@ -516,12 +595,29 @@ void menuButton()
     }
     delay(500);
   }
+	return;
 }
 
+void wait(int times)
+{
+  times = times / 10;
+  while (times > 0)
+  {
+    times-=10;
+    menuButton();
+    delay(10);
+  }
+  
+  
+}
 
 void One()
-{		
+{
+  RawMux(0);
+  //Variable1 = readMux(0);		// Convert Variable1 into a string, so we can change the text alignment to the right:		
 	Variable1 = adc();		// Convert Variable1 into a string, so we can change the text alignment to the right:
+  Var = readMux(0);		// Convert Variable1 into a string, so we can change the text alignment to the right:
+
 									// It can be also used to add or remove decimal numbers.
 	char string[10];			// Create a character array of 10 characters
 									// Convert float to a string:
@@ -548,70 +644,158 @@ void One()
 		  
 	{//Правое окошко
 		tft.setCursor(70, 67);  // Set position (x,y)
-		tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
+		tft.setTextColor(BLUE, BLACK);  // Set color: First color of text and after is color of background
 		tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-		Vol = mapInput(Variable1);
+		Vol = volume(Var);
+    //Vol = mapInput(Variable1);
 		tft.println(Vol);  // Print a text or value
 	}
 		
-	{// текст внизу
+	{// текст внизу cлева
     // Draw a black square in the background to "clear" the previous text:
 		// This is because we are going to use a custom font, and that doesn't support brackground color.
-		tft.fillRect(0, 90, 55, 34, BLACK);  // Draw filled rectangle (x,y,width,height,color)
+		tft.fillRect(0, 90, 127, 37, BLACK);  // Draw filled rectangle (x,y,width,height,color)
 		tft.setFont(&FreeSerif12pt7b);  // Set a custom font
 		tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
 		tft.setCursor(0, 120);  // Set position (x,y)
 		tft.setTextColor(MAGENTA);  // Set color of text. We are using custom font so there is no background color supported
 		tft.println(Variable1);  // Print Variable1
+		//tft.setFont();  // Reset to standard font, to stop using any custom font previously set
+	}
+  ABC = readMux(1);		// Convert Variable1 into a string, so we can change the text alignment to the right:	
+	{// текст внизу справа
+    // Draw a black square in the background to "clear" the previous text:
+		// This is because we are going to use a custom font, and that doesn't support brackground color.
+		//tft.fillRect(56, 90, 110, 34, BLACK);  // Draw filled rectangle (x,y,width,height,color)
+		//tft.setFont(&FreeSerif12pt7b);  // Set a custom font
+	//	tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
+		tft.setCursor(40, 120);  // Set position (x,y)
+		tft.setTextColor(GREEN);  // Set color of text. We are using custom font so there is no background color supported
+		tft.println(ABC);  // Print Variable1
+		//tft.setFont();  // Reset to standard font, to stop using any custom font previously set
+	}
+  EDF = readMux(2);		// Convert Variable1 into a string, so we can change the text alignment to the right:	
+	{// текст внизу more справа
+  // Draw a black square in the background to "clear" the previous text:
+	// This is because we are going to use a custom font, and that doesn't support brackground color.
+	//tft.fillRect(56, 90, 110, 34, BLACK);  // Draw filled rectangle (x,y,width,height,color)
+	//tft.setFont(&FreeSerif12pt7b);  // Set a custom font
+	//	tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
+		tft.setCursor(80, 120);  // Set position (x,y)
+		tft.setTextColor(YELLOW);  // Set color of text. We are using custom font so there is no background color supported
+		tft.println(volume(EDF));  // Print Variable1
 		tft.setFont();  // Reset to standard font, to stop using any custom font previously set
-	}		
-	//pinValue = analogRead(22);
-	waveform1.amplitude(mapInput(Variable1));
+	}	
+  //waveform1.amplitude(mapInput(Var));
+  //pinValue = analogRead(SIG1);
+
+	//waveform1.amplitude(volume(Var));
+
+  waveform1.amplitude(volume(Var));
 	//delay(10);  
 
+	return;
 }
 
 void Two()
 {
   // Set position (x,y)
-  int j = 1;
-  //int X = 5;
+  int j = 0;
+  int var = 0;
   int Y = 6;
   for (j = 0; j < 8; j++)
   {
+    tft.fillRect(15, Y, 40, 8, BLACK);  // Draw filled rectangle (x,y,width,height,color)
     tft.setCursor(15, Y);  // Set position (x,y)
 		tft.setTextColor(YELLOW, BLACK);  // Set color: First color of text and after is color of background
 		tft.setTextSize(1);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-		tft.println(readMux(j));  // Print a text or value
-     Y += 16;
+
+    var = readMux(j);		// Convert Variable1 into a string, so we can change the text alignment to the right:
+	  char string[8];			// Create a character array of 10 characters
+	  dtostrf(var, 6, 2, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
+
+    tft.println(var);  // Print a text or value
+    Y += 16;
+    menuButton();
   }
-  	//tft.drawLine(63, 0, 63, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
-    //X = 68;
+
     Y = 6;
     for (j = 8; j < 16; j++)
   {
+    tft.fillRect(80, Y, 100, 8, BLACK);  // Draw filled rectangle (x,y,width,height,color)
     tft.setCursor(83, Y);  // Set position (x,y)
-		//tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
-		//tft.setTextSize(1);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-		tft.println(readMux(j));  // Print a text or value
-    //X = -1;
+
+		var = readMux(j);		// Convert Variable1 into a string, so we can change the text alignment to the right:
+	  char string[8];			// Create a character array of 10 characters
+	  dtostrf(var, 6, 2, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
+
+    tft.println(var);  // Print a text or value
+
     Y += 16;
+    menuButton();
   }
+	return;
 }
 
 void Three()
-{
+{ // Set position (x,y)
+  int Last = B;
+  int j = 0;
+  int var = 0;
+  int Y = 6;
+  for (j = 0; j < 8; j++)
+  {
+    //tft.fillRect(15, Y, 50, 8, BLACK);  // Draw filled rectangle (x,y,width,height,color)
+    tft.setCursor(15, Y);  // Set position (x,y)
+		tft.setTextColor(YELLOW, BLACK);  // Set color: First color of text and after is color of background
+		tft.setTextSize(1);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
+
+    RawMux(j);		// Convert Variable1 into a string, so we can change the text alignment to the right:
+    var = adc();				// It can be also used to add or remove decimal numbers.
+	  char string[4];			// Create a character array of 10 characters
+	  dtostrf(var, 4, 0, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
+    tft.println(string);  // Print a text or value
+    Y += 16;
+    wait(500);
+    if (Last != B)
+    {
+      return;
+    }
+  }
+
+    Y = 6;
+    for (j = 8; j < 16; j++)
+  {
+    //tft.fillRect(80, Y, 120, 8, BLACK);  // Draw filled rectangle (x,y,width,height,color)
+    tft.setCursor(83, Y);  // Set position (x,y)
+
+    RawMux(j);		// Convert Variable1 into a string, so we can change the text alignment to the right:
+    var = adc();				// It can be also used to add or remove decimal numbers.
+	  char string[4];			// Create a character array of 10 characters
+	  dtostrf(var, 4, 0, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
+    tft.println(string);  // Print a text or value
+
+    Y += 16;
+    wait(500);
+    if (Last != B)
+    {
+      return;
+    }
+  }
   
+	return;
 }
 
 void Four()
 {
   
+	return;
 }
 
 void Error()
 {
   
+	return;
 }
 
 void loop()  // Start of loop
