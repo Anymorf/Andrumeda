@@ -7,10 +7,10 @@
 #include <TFT_ILI9163C.h>
 #include <Audio.h>
 //#include <SD.h>
-#include <Encoder.h>
+
 #include <pins.h>
 
-#define REV "Rev 0.2.79"
+#define REV "Rev 0.2.84"
 #define READ_SIG1 analogRead(SIG1)
 #define READ_SIG2 analogRead(SIG2)
 
@@ -44,8 +44,8 @@ int pinValue = 0;
 int Count = 200;  // Create a variable for calibration TIMEs
 bool state, buttonState = false;
 int MenuState, B = 1;   // Create a variable for menu button
-//Encoder myEnc(5, 6);
-long oldPosition  = -999;
+
+
 int atreshold()
 {
   int a22, avalue, i = 0;
@@ -155,29 +155,17 @@ void setup()  // Start of setup
 {//First screen
   // We are going to print on the display everything that is static on the setup, to leave the loop free for dynamic elements:
   tft.fillScreen(); // (BLACK);  // Fill screen with black
-	// Write to the display the text "Hello":
-	tft.setCursor(0, 1);  // Set position (x,y)
-	tft.setTextColor(WHITE);  // Set color of text. First is the color of text and after is color of background
-	tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
-	tft.println("Andrumeda");  // Print a text or value
-
-  // Start using a custom font:
-	tft.setFont(&FreeSerif12pt7b);  // Set a custom font
-	tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
-
-	// Write to the display the text "World":
-	tft.setCursor(1, 50);  // Set position (x,y)
-	tft.setTextColor(RED);  // Set color of text. We are using custom font so there is no background color supported
-	tft.println(REV);  // Print a text or value
-
-	// Stop using a custom font:
-	tft.setFont();  // Reset to standard font, to stop using any custom font previously set
 
   tft.drawLine(-1, 0, -1, 127, BLACK);  // Draw line (x0,y0,x1,y1,color)
 	tft.setCursor(0, 4);  // Set position (x,y)
 	tft.setTextColor(WHITE, BLACK);  // Set color of text. First is the color of text and after is color of background
 	tft.setTextSize(2);  // Set text size. Goes from 0 (the smallest) to 20 (very big)
 	tft.println("ADC-Screen");  // Print text
+
+	tft.setTextSize(1);  // Set text size. We are using custom font so you should always set text size as 0
+	tft.setCursor(80, 30);  // Set position (x,y)
+	tft.setTextColor(RED);  // Set color of text. We are using custom font so there is no background color supported
+	tft.println(REV);  // Print a text or value
 	
 	// Draw line:
 	tft.drawLine(0, 55, 127, 55, CYAN);  // Draw line (x0,y0,x1,y1,color)
@@ -204,11 +192,13 @@ float mapInput(int readValue)
   return result;
 }
 
+
 float volume(int Value)
 {
   float result = (Value / (1023.00 - treshold));
   return result;
 }
+
 
 int adc()
 {
@@ -216,6 +206,277 @@ int adc()
   int avalue = map(a22, 0, 1023, 1023,0);
   int result = (avalue - treshold);
   return result;
+}
+
+
+int readMux(int channel)
+{
+  int controlPin[] = {S0, S1, S2, S3};
+
+  int muxChannel[16][4]={
+    {0,0,0,0}, //channel 0
+    {1,0,0,0}, //channel 1
+    {0,1,0,0}, //channel 2
+    {1,1,0,0}, //channel 3
+    {0,0,1,0}, //channel 4
+    {1,0,1,0}, //channel 5
+    {0,1,1,0}, //channel 6
+    {1,1,1,0}, //channel 7
+    {0,0,0,1}, //channel 8
+    {1,0,0,1}, //channel 9
+    {0,1,0,1}, //channel 10
+    {1,1,0,1}, //channel 11
+    {0,0,1,1}, //channel 12
+    {1,0,1,1}, //channel 13
+    {0,1,1,1}, //channel 14
+    {1,1,1,1}  //channel 15
+  };
+  //loop through the 4 sig
+  for(int i = 0; i < 4; i ++){
+    digitalWrite(controlPin[i], muxChannel[channel][i]);
+  }
+  int val = adc();
+  return val;  //return the value
+}
+
+
+void RawMux(int channel)
+{
+  int controlPin[] = {S0, S1, S2, S3};
+
+  int muxChannel[16][4]={
+    {0,0,0,0}, //channel 0
+    {1,0,0,0}, //channel 1
+    {0,1,0,0}, //channel 2
+    {1,1,0,0}, //channel 3
+    {0,0,1,0}, //channel 4
+    {1,0,1,0}, //channel 5
+    {0,1,1,0}, //channel 6
+    {1,1,1,0}, //channel 7
+    {0,0,0,1}, //channel 8
+    {1,0,0,1}, //channel 9
+    {0,1,0,1}, //channel 10
+    {1,1,0,1}, //channel 11
+    {0,0,1,1}, //channel 12
+    {1,0,1,1}, //channel 13
+    {0,1,1,1}, //channel 14
+    {1,1,1,1}  //channel 15
+  };
+
+  digitalWrite(controlPin[0], muxChannel[channel][0]);
+  digitalWrite(controlPin[1], muxChannel[channel][1]);
+  digitalWrite(controlPin[2], muxChannel[channel][2]);
+  digitalWrite(controlPin[3], muxChannel[channel][3]);
+  
+  return;
+}
+
+
+bool readEncMux(int channel)
+{
+  RawMux(channel);		// Convert Variable1 into a string, so we can change the text alignment to the right:
+  bool enc = digitalRead(SIG2);
+  return enc;
+}
+
+void setEncodersUp() {
+//Encoder Test Part
+// mux var = readEncMux(j);
+  e1AOutPrev = readEncMux(3);   // (ENCODER_1_A);
+  e1SOutPrev = readEncMux(5);   // (ENCODER_1_S);
+  //e1AOutPrev = digitalRead(ENCODER_1_A);
+  //e1SOutPrev = digitalRead(ENCODER_1_S);
+ 
+  e2AOutPrev = digitalRead(ENCODER_2_A);
+  e2SOutPrev = digitalRead(ENCODER_2_S);
+ /*
+  e3AOutPrev = digitalRead(ENCODER_3_A);
+  e3SOutPrev = digitalRead(ENCODER_3_S);
+
+  e4AOutPrev = digitalRead(ENCODER_4_A);
+  e4SOutPrev = digitalRead(ENCODER_4_S);
+
+  e5AOutPrev = digitalRead(ENCODER_5_A);
+  e5SOutPrev = digitalRead(ENCODER_5_S);*/
+}
+
+void processEncoders() {
+  if (encoderProcessingDelayCounter > 0) {
+    encoderProcessingDelayCounter--;
+    return;
+  } else {
+    //encoderProcessingDelayCounter = ENCODER_PROCESSING_DELAY;
+  }
+
+
+  //  ----------###   1   ###----------
+
+  e1AOut = readEncMux(3);
+  if (e1AOut != e1AOutPrev){
+    if (readEncMux(4) != e1AOut) {
+      counter1--;
+    } else {
+      counter1++;
+    }
+    if ((counter1 / 2.00) == (counter1 / 2)){
+      if ((counter1 / 2) != encoder1Position) {
+        // process encoder 1 rotation behavior here. probably using  if ((counter1 / 2) > encoder1Position)
+        Serial.print("Encoder 1 is at ");
+        Serial.println(counter1 / 2);
+        
+        encoder1Position = (counter1 / 2);
+      }
+    } 
+  }
+  e1AOutPrev = e1AOut;
+  
+  e1SOut = readEncMux(5);
+  if (e1SOut != e1SOutPrev) {
+    // process encoder 1 button behavior here
+    if (e1SOut) {
+      Serial.println("Encoder 1 is released");
+    } else {
+      Serial.println("Encoder 1 is pushed down");
+    }
+  }
+  e1SOutPrev = e1SOut;
+
+
+  //  ----------###   2   ###----------
+
+  e2AOut = digitalRead(ENCODER_2_A);
+  if (e2AOut != e2AOutPrev){
+    if (digitalRead(ENCODER_2_B) != e2AOut) {
+      counter2--;
+    } else {
+      counter2++;
+    }
+    if ((counter2 / 2.00) == (counter2 / 2)){
+      if ((counter2 / 2) != encoder2Position) {
+        // process encoder 2 rotation behavior here. probably using  if ((counter2 / 2) > encoder2Position)
+        Serial.print("Encoder 2 is at ");
+        Serial.println(counter2 / 2);
+        
+        encoder2Position = (counter2 / 2);
+      }
+    } 
+  }
+  
+  e2AOutPrev = e2AOut;
+  
+  e2SOut = digitalRead(ENCODER_2_S);
+  if (e2SOut != e2SOutPrev) {
+    // process encoder 2 button behavior here
+    if (e2SOut) {
+      Serial.println("Encoder 2 is released");
+    } else {
+      Serial.println("Encoder 2 is pushed down");
+    }
+  }
+  e2SOutPrev = e2SOut;
+
+/*
+  //  ----------###   3   ###----------
+
+  e3AOut = digitalRead(ENCODER_3_A);
+  if (e3AOut != e3AOutPrev){
+    if (digitalRead(ENCODER_3_B) != e3AOut) {
+      counter3--;
+    } else {
+      counter3++;
+    }
+    if ((counter3 / 2.00) == (counter3 / 2)){
+      if ((counter3 / 2) != encoder3Position) {
+        // process encoder 3 rotation behavior here. probably using  if ((counter2 / 2) > encoder2Position)
+        Serial.print("Encoder 3 is at ");
+        Serial.println(counter3 / 2);
+        
+        encoder3Position = (counter3 / 2);
+      }
+    } 
+  }
+  
+  e3AOutPrev = e3AOut;
+  
+  e3SOut = digitalRead(ENCODER_3_S);
+  if (e3SOut != e3SOutPrev) {
+    // process encoder 3 button behavior here
+    if (e3SOut) {
+      Serial.println("Encoder 3 is released");
+    } else {
+      Serial.println("Encoder 3 is pushed down");
+    }
+  }
+  e3SOutPrev = e3SOut;
+
+
+  //  ----------###   4   ###----------
+
+  e4AOut = digitalRead(ENCODER_4_A);
+  if (e4AOut != e4AOutPrev){
+    if (digitalRead(ENCODER_4_B) != e4AOut) {
+      counter4--;
+    } else {
+      counter4++;
+    }
+    if ((counter4 / 2.00) == (counter4 / 2)){
+      if ((counter4 / 2) != encoder4Position) {
+        // process encoder 4 rotation behavior here. probably using  if ((counter2 / 2) > encoder2Position)
+        Serial.print("Encoder 4 is at ");
+        Serial.println(counter4 / 2);
+        
+        encoder4Position = (counter4 / 2);
+      }
+    } 
+  }
+  
+  e4AOutPrev = e4AOut;
+  
+  e4SOut = digitalRead(ENCODER_4_S);
+  if (e4SOut != e4SOutPrev) {
+    // process encoder 4 button behavior here
+    if (e4SOut) {
+      Serial.println("Encoder 4 is released");
+    } else {
+      Serial.println("Encoder 4 is pushed down");
+    }
+  }
+  e4SOutPrev = e4SOut;
+
+
+  //  ----------###   5   ###----------
+
+  e5AOut = digitalRead(ENCODER_5_A);
+  if (e5AOut != e5AOutPrev){
+    if (digitalRead(ENCODER_5_B) != e5AOut) {
+      counter5--;
+    } else {
+      counter5++;
+    }
+    if ((counter5 / 2.00) == (counter5 / 2)){
+      if ((counter5 / 2) != encoder5Position) {
+        // process encoder 5 rotation behavior here. probably using  if ((counter2 / 2) > encoder2Position)
+        Serial.print("Encoder 5 is at ");
+        Serial.println(counter5 / 2);
+        
+        encoder5Position = (counter5 / 2);
+      }
+    } 
+  }
+  
+  e5AOutPrev = e5AOut;
+  
+  e5SOut = digitalRead(ENCODER_5_S);
+  if (e5SOut != e5SOutPrev) {
+    // process encoder 5 button behavior here
+    if (e5SOut) {
+      Serial.println("Encoder 5 is released");
+    } else {
+      Serial.println("Encoder 5 is pushed down");
+    }
+  }
+  e5SOutPrev = e5SOut;
+  */
 }
 
 
@@ -302,7 +563,7 @@ void Draw_Three()
   int i = 1;
   //int X = 5;
   int Y = 6;
-  for (i = 1; i < 9; i++)
+  for (i = 0; i < 8; i++)
   {
     tft.setCursor(5, Y);  // Set position (x,y)
 		tft.setTextColor(CYAN, BLACK);  // Set color: First color of text and after is color of background
@@ -313,7 +574,7 @@ void Draw_Three()
   	//tft.drawLine(63, 0, 63, 127, CYAN);  // Draw line (x0,y0,x1,y1,color)
     //X = 68;
     Y = 6;
-    for (i = 9; i < 17; i++)
+    for (i = 8; i < 16; i++)
   {
     tft.setCursor(68, Y);  // Set position (x,y)
 		//tft.setTextColor(GREEN, BLACK);  // Set color: First color of text and after is color of background
@@ -356,75 +617,6 @@ void Draw_Error()
 }
 
 
-int readMux(int channel)
-{
-  int controlPin[] = {S0, S1, S2, S3};
-
-  int muxChannel[16][4]={
-    {0,0,0,0}, //channel 0
-    {1,0,0,0}, //channel 1
-    {0,1,0,0}, //channel 2
-    {1,1,0,0}, //channel 3
-    {0,0,1,0}, //channel 4
-    {1,0,1,0}, //channel 5
-    {0,1,1,0}, //channel 6
-    {1,1,1,0}, //channel 7
-    {0,0,0,1}, //channel 8
-    {1,0,0,1}, //channel 9
-    {0,1,0,1}, //channel 10
-    {1,1,0,1}, //channel 11
-    {0,0,1,1}, //channel 12
-    {1,0,1,1}, //channel 13
-    {0,1,1,1}, //channel 14
-    {1,1,1,1}  //channel 15
-  };
-  //loop through the 4 sig
-  for(int i = 0; i < 4; i ++){
-    digitalWrite(controlPin[i], muxChannel[channel][i]);
-  }
-  int val = adc();
-  return val;  //return the value
-}
-
-
-void RawMux(int channel)
-{
-  int controlPin[] = {S0, S1, S2, S3};
-
-  int muxChannel[16][4]={
-    {0,0,0,0}, //channel 0
-    {1,0,0,0}, //channel 1
-    {0,1,0,0}, //channel 2
-    {1,1,0,0}, //channel 3
-    {0,0,1,0}, //channel 4
-    {1,0,1,0}, //channel 5
-    {0,1,1,0}, //channel 6
-    {1,1,1,0}, //channel 7
-    {0,0,0,1}, //channel 8
-    {1,0,0,1}, //channel 9
-    {0,1,0,1}, //channel 10
-    {1,1,0,1}, //channel 11
-    {0,0,1,1}, //channel 12
-    {1,0,1,1}, //channel 13
-    {0,1,1,1}, //channel 14
-    {1,1,1,1}  //channel 15
-  };
-
-  digitalWrite(controlPin[0], muxChannel[channel][0]);
-  digitalWrite(controlPin[1], muxChannel[channel][1]);
-  digitalWrite(controlPin[2], muxChannel[channel][2]);
-  digitalWrite(controlPin[3], muxChannel[channel][3]);
-  
-  return;
-}
-
-bool readEncMux(int channel)
-{
-  RawMux(channel);		// Convert Variable1 into a string, so we can change the text alignment to the right:
-  bool enc = digitalRead(SIG2);
-  return enc;
-}
-
 void menuButton()
 {
   RawMux(0);
@@ -461,6 +653,7 @@ void menuButton()
 	return;
 }
 
+
 void wait(int times)
 {
   times = times / 10;
@@ -474,22 +667,23 @@ void wait(int times)
   
 }
 
+
 void One()
 {
-  //Encoder myEnc(readEncMux(1), readEncMux(2));
-  //long newPosition = myEnc.read();
-  //if (newPosition != oldPosition)
-  //oldPosition = newPosition;
-  //Serial.println(newPosition);
+    // Start using a custom font:
+  tft.fillRect(0, 30, 127, 25, BLACK);  // Draw filled rectangle (x,y,width,height,color) 
+	tft.setFont(&FreeSerif12pt7b);  // Set a custom font
+	tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
 
-  // Start using a custom font:
-	//tft.setFont(&FreeSerif12pt7b);  // Set a custom font
-	//tft.setTextSize(0);  // Set text size. We are using custom font so you should always set text size as 0
-	//tft.setCursor(1, 50);  // Set position (x,y)
-	//tft.setTextColor(RED);  // Set color of text. We are using custom font so there is no background color supported
-	//tft.println(REV);  // Print a text or value
-	//tft.setFont();  // Reset to standard font, to stop using any custom font previously set
+	// Write to the display the text "World":
+	tft.setCursor(1, 50);  // Set position (x,y)
+	tft.setTextColor(RED);  // Set color of text. We are using custom font so there is no background color supported
+	tft.println(encoder1Position);  // Print a text or value
 
+	// Stop using a custom font:
+	tft.setFont();  // Reset to standard font, to stop using any custom font previously set
+
+  processEncoders();
   RawMux(0);	
 	Variable1 = adc();		// Convert Variable1 into a string, so we can change the text alignment to the right:
   Var = readMux(0);		// Convert Variable1 into a string, so we can change the text alignment to the right:
@@ -564,7 +758,7 @@ void Two()
 	  dtostrf(var, 4, 0, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
     tft.println(var);  // Print a text or value
     Y += 16;
-    menuButton();
+    //menuButton();
   }
 
     Y = 6;
