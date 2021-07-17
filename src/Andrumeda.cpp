@@ -10,7 +10,7 @@
 
 #include <pins.h>
 
-#define REV "Rev 0.2.84"
+#define REV "Rev 0.2.85"
 #define READ_SIG1 analogRead(SIG1)
 #define READ_SIG2 analogRead(SIG2)
 
@@ -351,6 +351,9 @@ void processEncoders() {
     } else {
       counter2++;
     }
+    Serial.print("Encoder 2 is at ");
+    Serial.println(counter2);
+    /*
     if ((counter2 / 2.00) == (counter2 / 2)){
       if ((counter2 / 2) != encoder2Position) {
         // process encoder 2 rotation behavior here. probably using  if ((counter2 / 2) > encoder2Position)
@@ -359,7 +362,7 @@ void processEncoders() {
         
         encoder2Position = (counter2 / 2);
       }
-    } 
+    } */
   }
   
   e2AOutPrev = e2AOut;
