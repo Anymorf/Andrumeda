@@ -6,11 +6,13 @@
 #include <Fonts/FreeSerif12pt7b.h>  // Add a custom font FreeSerif12pt7b
 #include <TFT_ILI9163C.h>
 #include <Audio.h>
+#define ENCODER_OPTIMIZE_INTERRUPTS
+#include <Encoder.h>
 //#include <SD.h>
 
 #include <pins.h>
 
-#define REV "Rev 0.2.85"
+#define REV "Rev 0.2.90"
 #define READ_SIG1 analogRead(SIG1)
 #define READ_SIG2 analogRead(SIG2)
 
@@ -43,7 +45,8 @@ float Vol, a = 0;		// volume
 int pinValue = 0;
 int Count = 200;  // Create a variable for calibration TIMEs
 bool state, buttonState = false;
-int MenuState, B = 1;   // Create a variable for menu button
+int MenuStates = 3;
+int oldB, B = 1;   // Create a variable for menu button
 
 
 int atreshold()
@@ -656,6 +659,59 @@ void menuButton()
 	return;
 }
 
+void menuButton2()
+{
+  int newPosition = Main_Enc.read();
+  if (newPosition > oldPosition+3 or newPosition < oldPosition-3) {
+    if (newPosition > oldPosition+3) {
+      if (B >= MenuStates) {   // 4  указывает количество пунктов меню
+      B = MenuStates;
+      state = false;
+      } else {
+      B = B + 1;
+      state = true;
+      }
+    }
+    if (newPosition < oldPosition-3) {
+      if (B <= 1) {   // 4  указывает количество пунктов меню
+      B = 1;
+      state = false;
+      } else {
+      B = B - 1;
+      state = true;
+      }
+    }
+    oldPosition = newPosition;    
+    Serial.println(newPosition);
+    if (state == true) {
+      tft.fillScreen(); // (BLACK);  // Fill screen with black
+      switch (B) {
+        case 1:    // your hand is on the sensor
+          Serial.println("Draw_One");
+          Draw_One();
+          break;
+        case 2:    // your hand is close to the sensor
+          Serial.println("Draw_Two");
+          Draw_Two();
+          break;
+        case 3:    // your hand is a few inches from the sensor
+          Serial.println("Draw_Three");
+          Draw_Three();
+          break;
+        case 4:    // your hand is nowhere near the sensor
+          Serial.println("Draw_Four");
+          Draw_Four();
+          break;
+        default:
+          Draw_Error();
+          break;
+      }
+    }
+    delay(50);
+  }
+	return;
+}
+
 
 void wait(int times)
 {
@@ -761,7 +817,7 @@ void Two()
 	  dtostrf(var, 4, 0, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
     tft.println(var);  // Print a text or value
     Y += 16;
-    //menuButton();
+    //menuButton2();
   }
 
     Y = 6;
@@ -776,16 +832,13 @@ void Two()
     tft.println(var);  // Print a text or value
 
     Y += 16;
-    menuButton();
+    //menuButton2();
   }
 	return;
 }
 
 void Three()
 { // Reading Encoders data
-  pinValue = readMux(0);
-  while (pinValue < 500)
-  {
     pinValue = readMux(0);
     int j = 0;
     int var = 0;
@@ -815,8 +868,8 @@ void Three()
       dtostrf(var, 4, 0, string);  // (<variable>,<amount of digits we are going to use>,<amount of decimal digits>,<string name>)
       tft.println(string);  // Print a text or value
       Y += 16;
-    }
-  }
+      //menuButton2();
+    } 
 	return;
 }
 
@@ -835,7 +888,8 @@ void Error()
 void loop()  // Start of loop
 {
   //Serial.println("loop");
-  menuButton();
+  //menuButton();
+  menuButton2();
   switch (B) {
     case 1:    // your hand is on the sensor
       One();

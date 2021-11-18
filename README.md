@@ -1,1 +1,30 @@
 # Andrumeda
+- [x]  Подключение экрана
+    - [x]  подключить ucglib
+- [x]  Подключение библиотеки мультиплексоров
+- [x]  Подключение энкодера на входы 5 и 9
+    - [X]  Проверка Подключения 
+    - [X]  Переключение Меню на Новый энкодер
+- [ ]  драйвер для энкодера
+
+- [ ]  адаптация драйвера экрана  04
+- [x]  документация к прошивке 4.0
+- [ ]  
+- [x]  SYNTH
+    - [x]  Simple Synth
+    - [x]  Modulation
+    - [ ]  * hang synthes
+- [ ]  SAMPLER
+    - [ ]  test wave2code
+    - [ ]  sample mode
+- [ ]  Midi
+- [ ]  UX design
+- [ ]  color scheme
+- [ ]  save, load preset
+- EFFECTS
+    - [ ]  delay
+    - [ ]  reverb
+    - [ ]  bitcrasher
+- [ ]  FILTER
+- [ ]  LOOPER
+- [ ]  LFO/Modulation

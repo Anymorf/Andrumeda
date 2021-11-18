@@ -1,15 +1,18 @@
 // Declare pins for the display:
-#define TFT_CS     14
-#define TFT_RST    10  // You can also connect this to the Arduino reset in which case, set this #define pin to -1!
-#define TFT_DC     15
+#define TFT_CS     14  // сигнал CS Экрана
+#define TFT_RST    10  // сигнал RST Экрана 
+#define TFT_DC     15  //  сигнал Данных Экрана
 
 // Declare pins for the MUX CD74HC4067:
-#define S0 0
-#define S1 1
-#define S2 2
-#define S3 3 
-#define SIG1 22   //  A8
-#define SIG2 16   //  A8
+#define S0 0   //  1й бит адресса мультиплексора
+#define S1 1   //  2й бит адресса мультиплексора
+#define S2 2   //  3й бит адресса мультиплексора  
+#define S3 3   //  4й бит адресса мультиплексора  
+#define SIG1 22   //  выход первого мультиплексора
+#define SIG2 16   //  выход Второго мультиплексора
+
+#define Main_ENCODER_A 5   //  Ноги основного энкодера напрямую к лапам Тинзи
+#define Main_ENCODER_B 9   //  Ноги основного энкодера напрямую к лапам Тинзи
 
 #define ENCODER_1_S readEncMux(5)
 #define ENCODER_1_A readEncMux(3)
@@ -32,6 +35,10 @@
 #define ENCODER_5_B 0
 */
 #define ENCODER_PROCESSING_DELAY 100
+
+Encoder Main_Enc(Main_ENCODER_A, Main_ENCODER_B);
+
+int oldPosition  = 0;
 
 int counter1 = 0;
 int counter2 = 0;

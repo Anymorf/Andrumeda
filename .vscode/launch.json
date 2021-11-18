@@ -29,6 +29,16 @@
             "projectEnvName": "teensy40",
             "toolchainBinDir": "C:/Users/Anymorf/.platformio/packages/toolchain-gccarmnoneeabi@1.50401.190816/bin",
             "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "e:/BackUp/mydoc/PlatformIO/Projects/Andrumeda/Andrumeda-5/Andrumeda-5/.pio/build/teensy40/firmware.elf",
+            "projectEnvName": "teensy40",
+            "toolchainBinDir": "C:/Users/Anymorf/.platformio/packages/toolchain-gccarmnoneeabi@1.50401.190816/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "loadMode": "manual"
         }
     ]
 }

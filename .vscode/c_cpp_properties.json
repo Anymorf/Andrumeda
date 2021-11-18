@@ -168,6 +168,7 @@
                 "e:/BackUp/mydoc/Arduino/libraries/WireUtility_Library",
                 "e:/BackUp/mydoc/Arduino/libraries/ZEeprom",
                 "e:/BackUp/mydoc/Arduino/libraries/microDS18B20/src",
+                "e:/BackUp/mydoc/Arduino/libraries/microLED/src",
                 "e:/BackUp/mydoc/Arduino/libraries/microWire",
                 "e:/BackUp/mydoc/Arduino/libraries/tcMenu/src",
                 "C:/Users/Anymorf/.platformio/packages/framework-arduinoteensy/libraries/ADC",
@@ -367,6 +368,7 @@
                     "e:/BackUp/mydoc/Arduino/libraries/WireUtility_Library",
                     "e:/BackUp/mydoc/Arduino/libraries/ZEeprom",
                     "e:/BackUp/mydoc/Arduino/libraries/microDS18B20/src",
+                    "e:/BackUp/mydoc/Arduino/libraries/microLED/src",
                     "e:/BackUp/mydoc/Arduino/libraries/microWire",
                     "e:/BackUp/mydoc/Arduino/libraries/tcMenu/src",
                     "C:/Users/Anymorf/.platformio/packages/framework-arduinoteensy/libraries/ADC",
@@ -405,7 +407,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=50101",
+                "PLATFORMIO=50203",
                 "__IMXRT1062__",
                 "ARDUINO_TEENSY40",
                 "USB_SERIAL",
